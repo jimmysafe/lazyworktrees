@@ -44,3 +44,23 @@ export function parseWorktreeList(output: string): Worktree[] {
 
   return worktrees;
 }
+
+export async function isGitRepo(cwd?: string): Promise<boolean> {
+  const proc = Bun.spawn(["git", "rev-parse", "--git-dir"], {
+    cwd,
+    stdout: "ignore",
+    stderr: "ignore",
+  });
+  const code = await proc.exited;
+  return code === 0;
+}
+
+export async function getWorktrees(): Promise<Worktree[]> {
+  const proc = Bun.spawn(["git", "worktree", "list", "--porcelain"], {
+    stdout: "pipe",
+    stderr: "ignore",
+  });
+  const output = await new Response(proc.stdout).text();
+  await proc.exited;
+  return parseWorktreeList(output);
+}
