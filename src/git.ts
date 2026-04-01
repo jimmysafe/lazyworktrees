@@ -62,5 +62,7 @@ export async function getWorktrees(): Promise<Worktree[]> {
   });
   const output = await new Response(proc.stdout).text();
   await proc.exited;
-  return parseWorktreeList(output);
+  const worktrees = parseWorktreeList(output);
+  const { existsSync } = await import("node:fs");
+  return worktrees.filter((wt) => existsSync(wt.path));
 }
